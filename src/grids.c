@@ -31,6 +31,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
 **************************************************************************************************************/
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -792,6 +793,46 @@ int WriteVDWGrid(int l)
   return 0;
 }
 
+unsigned int buffsize = 1024;
+
+int count_words(char *line)
+{
+  int i;
+  int count = 0;
+  for (i = 0; line[i] != '\0'; i++)
+
+  {
+
+    if (line[i] == ' ' && line[i + 1] != ' ')
+
+      count++;
+  }
+
+  return count + 1;
+}
+
+char **split_by_space(char *line, int n_strings)
+{
+  unsigned int i;
+  char **content_array = malloc(n_strings * sizeof(char *));
+  for (i = 0; i < n_strings; ++i)
+  {
+    content_array[i] = (char *)malloc(buffsize + 1);
+  }
+
+  char *token = strtok(line, " ");
+  unsigned int idx = 0;
+  // loop through the string to extract all other tokens
+  while (token != NULL)
+  {
+    content_array[idx] = token;
+    ++idx;
+
+    token = strtok(NULL, " ");
+  }
+  return content_array;
+}
+
 void ReadVDWGrid(void)
 {
   int i, j, k, l, m;
@@ -799,6 +840,57 @@ void ReadVDWGrid(void)
   INT_VECTOR3 number_of_unit_cells;
   FILE *FilePtr;
   char buffer[256];
+
+  fprintf(stderr, "Doing something extra\n");
+  FILE *fp;
+  sprintf(buffer, "%s/share/raspa/grids/%s", RASPA_DIRECTORY, "data.cube");
+  if (!(fp = fopen(buffer, "r")))
+  {
+    fprintf(stderr, "Error:  file %s does not exist.\n", buffer);
+    exit(1);
+  }
+
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+
+  getline(&line, &len, fp);
+  getline(&line, &len, fp);
+  getline(&line, &len, fp);
+  char **line3 = split_by_space(line, 4);
+
+  int n_atoms = atoi(line3[0]);
+  float origin[3] = {atof(line3[1]),
+                     atof(line3[2]),
+                     atof(line3[3])};
+
+  getline(&line, &len, fp);
+  char **line4 = split_by_space(line, 4);
+  int shape_x = atoi(line4[0]);
+  double cell_x[3] =
+      getline(&line, &len, fp);
+  char **line5 = split_by_space(line, 4);
+  int shape_y = atoi(line5[0]);
+  getline(&line, &len, fp);
+  char **line6 = split_by_space(line, 4);
+  int shape_z = atoi(line6[0]);
+  int shape[3] = {shape_x, shape_y, shape_z};
+
+  fprintf(stderr, "NATOMS %i\n", n_atoms);
+  fprintf(stderr, "ORIGIN %f %f %f\n", origin[0], origin[1], origin[2]);
+  fprintf(stderr, "SHAPE %i %i %i\n", shape[0], shape[1], shape[2]);
+
+  while ((read = getline(&line, &len, fp)) != -1)
+  {
+    // fprintf(stderr, "Retrieved line of length %zu:\n", read);
+    // fprintf(stderr, "%s", line);
+  }
+
+  if (line)
+    free(line);
+  fclose(fp);
+
+  fprintf(stderr, "Stop doing something extra\n");
 
   fprintf(stderr, "Reading VDW grid\n");
 
