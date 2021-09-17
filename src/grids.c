@@ -913,6 +913,7 @@ void ReadVDWGrid(void)
   // FILE *FilePtr;
   char buffer[256];
 
+  double bohr2angstrom = 0.529177249;
   fprintf(stderr, "Doing something extra\n");
   FILE *fp;
   if (!(fp = fopen("grid.cube", "r")))
@@ -932,47 +933,47 @@ void ReadVDWGrid(void)
   char **line3 = split_by_space(line, 4);
 
   int n_atoms = atoi(line3[0]);
-  float origin[3] = {extended_atof(line3[1]),
-                     extended_atof(line3[2]),
-                     extended_atof(line3[3])};
+  float origin[3] = {extended_atof(line3[1]) * bohr2angstrom,
+                     extended_atof(line3[2]) * bohr2angstrom,
+                     extended_atof(line3[3]) * bohr2angstrom};
 
   double cell[3][3];
   double spacing[3][3];
   getline(&line, &len, fp);
   char **line4 = split_by_space(line, 4);
   int shape_x = atoi(line4[0]);
-  spacing[0][0] = extended_atof(line4[1]);
-  spacing[0][1] = extended_atof(line4[2]);
-  spacing[0][2] = extended_atof(line4[3]);
+  spacing[0][0] = extended_atof(line4[1]) * bohr2angstrom;
+  spacing[0][1] = extended_atof(line4[2]) * bohr2angstrom;
+  spacing[0][2] = extended_atof(line4[3]) * bohr2angstrom;
 
-  cell[0][0] = extended_atof(line4[1]) * shape_x;
-  cell[0][1] = extended_atof(line4[2]) * shape_x;
-  cell[0][2] = extended_atof(line4[3]) * shape_x;
+  cell[0][0] = extended_atof(line4[1]) * shape_x * bohr2angstrom;
+  cell[0][1] = extended_atof(line4[2]) * shape_x * bohr2angstrom;
+  cell[0][2] = extended_atof(line4[3]) * shape_x * bohr2angstrom;
 
   getline(&line, &len, fp);
   char **line5 = split_by_space(line, 4);
   int shape_y = atoi(line5[0]);
 
-  spacing[1][0] = extended_atof(line5[1]);
-  spacing[1][1] = extended_atof(line5[2]);
-  spacing[1][2] = extended_atof(line5[3]);
+  spacing[1][0] = extended_atof(line5[1]) * bohr2angstrom;
+  spacing[1][1] = extended_atof(line5[2]) * bohr2angstrom;
+  spacing[1][2] = extended_atof(line5[3]) * bohr2angstrom;
 
-  cell[1][0] = extended_atof(line5[1]) * shape_y;
-  cell[1][1] = extended_atof(line5[2]) * shape_y;
-  cell[1][2] = extended_atof(line5[3]) * shape_y;
+  cell[1][0] = extended_atof(line5[1]) * shape_y * bohr2angstrom;
+  cell[1][1] = extended_atof(line5[2]) * shape_y * bohr2angstrom;
+  cell[1][2] = extended_atof(line5[3]) * shape_y * bohr2angstrom;
 
   getline(&line, &len, fp);
   char **line6 = split_by_space(line, 4);
   int shape_z = atoi(line6[0]);
   int shape[3] = {shape_x, shape_y, shape_z};
 
-  spacing[2][0] = extended_atof(line6[1]);
-  spacing[2][1] = extended_atof(line6[2]);
-  spacing[2][2] = extended_atof(line6[3]);
+  spacing[2][0] = extended_atof(line6[1]) * bohr2angstrom;
+  spacing[2][1] = extended_atof(line6[2]) * bohr2angstrom;
+  spacing[2][2] = extended_atof(line6[3]) * bohr2angstrom;
 
-  cell[2][0] = extended_atof(line6[1]) * shape_z;
-  cell[2][1] = extended_atof(line6[2]) * shape_z;
-  cell[2][2] = extended_atof(line6[3]) * shape_z;
+  cell[2][0] = extended_atof(line6[1]) * shape_z * bohr2angstrom;
+  cell[2][1] = extended_atof(line6[2]) * shape_z * bohr2angstrom;
+  cell[2][2] = extended_atof(line6[3]) * shape_z * bohr2angstrom;
 
   unsigned int idx;
   for (idx = 0; idx < n_atoms; ++idx)
