@@ -915,12 +915,12 @@ void ReadVDWGrid(void)
 
   fprintf(stderr, "Doing something extra\n");
   FILE *fp;
-  sprintf(buffer, "%s/share/raspa/grids/%s", RASPA_DIRECTORY, "data.cube");
-  if (!(fp = fopen(buffer, "r")))
+  if (!(fp = fopen("grid.cube", "r")))
   {
     fprintf(stderr, "Error:  file %s does not exist.\n", buffer);
     exit(1);
   }
+  l = 0;
 
   char *line = NULL;
   size_t len = 0;
@@ -1145,7 +1145,30 @@ void ReadVDWGrid(void)
         ++counter;
       }
 
-  // fclose(FilePtr);
+  // Write the stuff into a RASPA format
+  FILE *FilePtr;
+
+  FilePtr = fopen("grid.raspa", "w");
+
+  fwrite(&SpacingVDWGrid, 1, sizeof(REAL), FilePtr);
+  fwrite(&NumberOfVDWGridPoints, 1, sizeof(INT_VECTOR3), FilePtr);
+  fwrite(&SizeGrid, 1, sizeof(VECTOR), FilePtr);
+  fwrite(&ShiftGrid, 1, sizeof(VECTOR), FilePtr);
+  fwrite(&DeltaVDWGrid, 1, sizeof(VECTOR), FilePtr);
+  fwrite(&unit_cell_size, 1, sizeof(VECTOR), FilePtr);
+  fwrite(&number_of_unit_cells, 1, sizeof(INT_VECTOR3), FilePtr);
+  // fprintf(stderr, "%i", GridTypeList[0]);
+  for (m = 0; m < 1; m++)
+    for (i = 0; i <= NumberOfVDWGridPoints.x; i++)
+      for (j = 0; j <= NumberOfVDWGridPoints.y; j++)
+        for (k = 0; k <= NumberOfVDWGridPoints.z; k++)
+        {
+
+          fwrite(&VDWGrid[GridTypeList[l]][i][j][k][m], 1, sizeof(float), FilePtr);
+        }
+
+  fclose(FilePtr);
+  exit(0);
 }
 
 int WriteCoulombGrid(void)
