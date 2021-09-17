@@ -808,7 +808,7 @@ int count_words(char *line)
       count++;
   }
 
-  return count + 1;
+  return count;
 }
 
 char **split_by_space(char *line, int n_strings)
@@ -833,12 +833,84 @@ char **split_by_space(char *line, int n_strings)
   return content_array;
 }
 
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+/* return true for positive, false for negative,
+   and advance `*s` to next position */
+static bool parse_sign(const char **const s)
+{
+  switch (**s)
+  {
+  case '-':
+    ++*s;
+    return false;
+  case '+':
+    ++*s;
+    return true;
+  default:
+    return true;
+  }
+}
+
+/* return decimal value of digits,
+   advancing `*s` to the next character,
+   and storing the number of digits read into *count */
+static double parse_digits(const char **const s, int *const count)
+{
+  double value = 0.0;
+  int c = 0;
+  while (isdigit(**s))
+  {
+    value = value * 10.0 + (*(*s)++ - '0');
+    ++c;
+  }
+  if (count)
+    *count = c;
+  return value;
+}
+
+double extended_atof(const char *s)
+{
+  /*skip white space*/
+  while (isspace(*s))
+    ++s;
+
+  const bool valuesign = parse_sign(&s); /* sign of the number */
+  double value = parse_digits(&s, NULL);
+
+  if (*s == '.')
+  {
+    int d; /* number of digits in fraction */
+    ++s;
+    double fraction = parse_digits(&s, &d);
+    while (d--)
+      fraction /= 10.0;
+    value += fraction;
+  }
+
+  if (!valuesign)
+    value = -value;
+
+  if (tolower(*s++) != 'e')
+    return value;
+
+  /* else, we have an exponent; parse its sign and value */
+  const double exponentsign = parse_sign(&s) ? 10. : .1;
+  int exponent = parse_digits(&s, NULL);
+  while (exponent--)
+    value *= exponentsign;
+
+  return value;
+}
+#include <assert.h>
 void ReadVDWGrid(void)
 {
   int i, j, k, l, m;
   VECTOR unit_cell_size;
   INT_VECTOR3 number_of_unit_cells;
-  FILE *FilePtr;
+  // FILE *FilePtr;
   char buffer[256];
 
   fprintf(stderr, "Doing something extra\n");
@@ -860,31 +932,77 @@ void ReadVDWGrid(void)
   char **line3 = split_by_space(line, 4);
 
   int n_atoms = atoi(line3[0]);
-  float origin[3] = {atof(line3[1]),
-                     atof(line3[2]),
-                     atof(line3[3])};
+  float origin[3] = {extended_atof(line3[1]),
+                     extended_atof(line3[2]),
+                     extended_atof(line3[3])};
 
+  double cell[3][3];
+  double spacing[3][3];
   getline(&line, &len, fp);
   char **line4 = split_by_space(line, 4);
   int shape_x = atoi(line4[0]);
-  double cell_x[3] =
-      getline(&line, &len, fp);
+  spacing[0][0] = extended_atof(line4[1]);
+  spacing[0][1] = extended_atof(line4[2]);
+  spacing[0][2] = extended_atof(line4[3]);
+
+  cell[0][0] = extended_atof(line4[1]) * shape_x;
+  cell[0][1] = extended_atof(line4[2]) * shape_x;
+  cell[0][2] = extended_atof(line4[3]) * shape_x;
+
+  getline(&line, &len, fp);
   char **line5 = split_by_space(line, 4);
   int shape_y = atoi(line5[0]);
+
+  spacing[1][0] = extended_atof(line5[1]);
+  spacing[1][1] = extended_atof(line5[2]);
+  spacing[1][2] = extended_atof(line5[3]);
+
+  cell[1][0] = extended_atof(line5[1]) * shape_y;
+  cell[1][1] = extended_atof(line5[2]) * shape_y;
+  cell[1][2] = extended_atof(line5[3]) * shape_y;
+
   getline(&line, &len, fp);
   char **line6 = split_by_space(line, 4);
   int shape_z = atoi(line6[0]);
   int shape[3] = {shape_x, shape_y, shape_z};
 
+  spacing[2][0] = extended_atof(line6[1]);
+  spacing[2][1] = extended_atof(line6[2]);
+  spacing[2][2] = extended_atof(line6[3]);
+
+  cell[2][0] = extended_atof(line6[1]) * shape_z;
+  cell[2][1] = extended_atof(line6[2]) * shape_z;
+  cell[2][2] = extended_atof(line6[3]) * shape_z;
+
+  unsigned int idx;
+  for (idx = 0; idx < n_atoms; ++idx)
+  {
+    getline(&line, &len, fp);
+    // fprintf(stderr, "%s", line);
+  }
+
+  float *grid_data = malloc(shape_x * shape_y * shape_z * sizeof(float));
+  int counter = 0;
+  while ((read = getline(&line, &len, fp)) != -1)
+  {
+    int n_floats = count_words(line);
+    char **data = split_by_space(line, n_floats);
+
+    for (idx = 0; idx < n_floats; ++idx)
+    {
+      grid_data[counter] = extended_atof(data[idx]);
+      ++counter;
+    }
+  }
+  assert(counter == shape_x * shape_y * shape_z);
+
+  fprintf(stderr, "Counter %i\n", counter);
   fprintf(stderr, "NATOMS %i\n", n_atoms);
   fprintf(stderr, "ORIGIN %f %f %f\n", origin[0], origin[1], origin[2]);
   fprintf(stderr, "SHAPE %i %i %i\n", shape[0], shape[1], shape[2]);
-
-  while ((read = getline(&line, &len, fp)) != -1)
-  {
-    // fprintf(stderr, "Retrieved line of length %zu:\n", read);
-    // fprintf(stderr, "%s", line);
-  }
+  fprintf(stderr, "CELL\n %f %f %f\n", cell[0][0], cell[0][1], cell[0][2]);
+  fprintf(stderr, "%f %f %f\n", cell[1][0], cell[1][1], cell[1][2]);
+  fprintf(stderr, "%f %f %f\n", cell[2][0], cell[2][1], cell[2][2]);
 
   if (line)
     free(line);
@@ -894,63 +1012,140 @@ void ReadVDWGrid(void)
 
   fprintf(stderr, "Reading VDW grid\n");
 
-  for (i = 0; i < NumberOfPseudoAtoms; i++)
-    VDWGrid[i] = NULL;
+  // for (i = 0; i < NumberOfPseudoAtoms; i++)
+  //   VDWGrid[i] = NULL;
 
-  for (l = 0; l < NumberOfGrids; l++)
+  // for (l = 0; l < NumberOfGrids; l++)
+  // {
+  //   sprintf(buffer, "%s/share/raspa/grids", RASPA_DIRECTORY);
+  //   sprintf(buffer, "%s/share/raspa/grids/%s/%s/%lf/%s_%s_%s.grid",
+  //           RASPA_DIRECTORY,
+  //           ForceField,
+  //           Framework[CurrentSystem].Name[0],
+  //           (double)SpacingVDWGrid,
+  //           Framework[CurrentSystem].Name[0],
+  //           PseudoAtoms[GridTypeList[l]].Name,
+  //           ShiftPotentials ? "shifted" : "truncated");
+  //   fprintf(stderr, "Opening: %s\n", buffer);
+  //   if (!(FilePtr = fopen(buffer, "r")))
+  //   {
+  //     fprintf(stderr, "Error:  file %s does not exist.\n", buffer);
+  //     exit(1);
+  //   }
+  // }
+
+  // ShiftGrid.x = origin[0];
+  // ShiftGrid.y = origin[1];
+  // ShiftGrid.z = origin[2];
+
+  // SizeGrid.x = shape_x;
+  // SizeGrid.y = shape_y;
+  // SizeGrid.z = shape_z;
+
+  // fread(&SpacingVDWGrid, 1, sizeof(REAL), FilePtr);
+  double spacing_x = sqrt(spacing[0][0] * spacing[0][0] + spacing[0][1] * spacing[0][1] + spacing[0][2] * spacing[0][2]);
+  double spacing_y = sqrt(spacing[1][0] * spacing[1][0] + spacing[1][1] * spacing[1][1] + spacing[1][2] * spacing[1][2]);
+  double spacing_z = sqrt(spacing[2][0] * spacing[2][0] + spacing[2][1] * spacing[2][1] + spacing[2][2] * spacing[2][2]);
+  double mean_spacing = (spacing_x + spacing_y + spacing_z) / 3;
+  fprintf(stderr, "GridSpacing x %f\n", spacing_x);
+  fprintf(stderr, "GridSpacing y %f\n", spacing_y);
+  fprintf(stderr, "GridSpacing z %f\n", spacing_z);
+  fprintf(stderr, "GridSpacing mean %f\n", mean_spacing);
+
+  SpacingVDWGrid = mean_spacing;
+
+  // fread(&NumberOfVDWGridPoints, 1, sizeof(INT_VECTOR3), FilePtr);
+  NumberOfVDWGridPoints.x = shape_x;
+  NumberOfVDWGridPoints.y = shape_y;
+  NumberOfVDWGridPoints.z = shape_z;
+  fprintf(stderr, "NumberOfGridPoints %i %i %i\n", NumberOfVDWGridPoints.x, NumberOfVDWGridPoints.y, NumberOfVDWGridPoints.z);
+
+  // fread(&SizeGrid, 1, sizeof(VECTOR), FilePtr);
+  SizeGrid.x = sqrt(cell[0][0] * cell[0][0] + cell[0][1] * cell[0][1] + cell[0][2] * cell[0][2]);
+  SizeGrid.y = sqrt(cell[1][0] * cell[1][0] + cell[1][1] * cell[1][1] + cell[1][2] * cell[1][2]);
+  SizeGrid.z = sqrt(cell[2][0] * cell[2][0] + cell[2][1] * cell[2][1] + cell[2][2] * cell[2][2]);
+
+  fprintf(stderr, "SizeGrid %f %f %f\n", SizeGrid.x, SizeGrid.y, SizeGrid.z);
+  // fread(&ShiftGrid, 1, sizeof(VECTOR), FilePtr);
+  ShiftGrid.x = origin[0];
+  ShiftGrid.y = origin[1];
+  ShiftGrid.z = origin[2];
+  fprintf(stderr, "ShiftGrid %f %f %f\n", ShiftGrid.x, ShiftGrid.y, ShiftGrid.z);
+
+  // fread(&DeltaVDWGrid, 1, sizeof(VECTOR), FilePtr);
+  DeltaVDWGrid.x = spacing_x;
+  DeltaVDWGrid.y = spacing_y;
+  DeltaVDWGrid.z = spacing_z;
+  fprintf(stderr, "DeltaVDW %f %f %f\n", DeltaVDWGrid.x, DeltaVDWGrid.y, DeltaVDWGrid.z);
+
+  // fread(&unit_cell_size, 1, sizeof(VECTOR), FilePtr);
+  unit_cell_size.x = SizeGrid.x;
+  unit_cell_size.y = SizeGrid.y;
+  unit_cell_size.z = SizeGrid.z;
+  fprintf(stderr, "unitcellsize %f %f %f\n", unit_cell_size.x, unit_cell_size.y, unit_cell_size.z);
+
+  // fread(&number_of_unit_cells, 1, sizeof(INT_VECTOR3), FilePtr);
+  number_of_unit_cells.x = 1;
+  number_of_unit_cells.y = 1;
+  number_of_unit_cells.z = 1;
+  fprintf(stderr, "n_unitcells %i %i %i\n", number_of_unit_cells.x, number_of_unit_cells.y, number_of_unit_cells.z);
+
+  // if ((fabs(UnitCellSize[CurrentSystem].x - unit_cell_size.x) > 1e-8) || (fabs(UnitCellSize[CurrentSystem].y - unit_cell_size.y) > 1e-8) ||
+  //     (fabs(UnitCellSize[CurrentSystem].z - unit_cell_size.z) > 1e-8))
+  // {
+  //   fprintf(stderr, "Error in reading the grid: unit-cell size does not match\n");
+  //   exit(0);
+  // }
+
+  // Allocate the memory for this grid
+  VDWGrid[GridTypeList[l]] = (float ****)calloc(NumberOfVDWGridPoints.x + 1, sizeof(float ***));
+  for (i = 0; i <= NumberOfVDWGridPoints.x; i++)
   {
-    sprintf(buffer, "%s/share/raspa/grids", RASPA_DIRECTORY);
-    sprintf(buffer, "%s/share/raspa/grids/%s/%s/%lf/%s_%s_%s.grid",
-            RASPA_DIRECTORY,
-            ForceField,
-            Framework[CurrentSystem].Name[0],
-            (double)SpacingVDWGrid,
-            Framework[CurrentSystem].Name[0],
-            PseudoAtoms[GridTypeList[l]].Name,
-            ShiftPotentials ? "shifted" : "truncated");
-    fprintf(stderr, "Opening: %s\n", buffer);
-    if (!(FilePtr = fopen(buffer, "r")))
+    VDWGrid[GridTypeList[l]][i] = (float ***)calloc(NumberOfVDWGridPoints.y + 1, sizeof(float **));
+    for (j = 0; j <= NumberOfVDWGridPoints.y; j++)
     {
-      fprintf(stderr, "Error:  file %s does not exist.\n", buffer);
-      exit(1);
+      VDWGrid[GridTypeList[l]][i][j] = (float **)calloc(NumberOfVDWGridPoints.z + 1, sizeof(float *));
+      for (k = 0; k <= NumberOfVDWGridPoints.z; k++)
+        VDWGrid[GridTypeList[l]][i][j][k] = (float *)calloc(8, sizeof(float));
     }
-
-    fread(&SpacingVDWGrid, 1, sizeof(REAL), FilePtr);
-    fread(&NumberOfVDWGridPoints, 1, sizeof(INT_VECTOR3), FilePtr);
-    fread(&SizeGrid, 1, sizeof(VECTOR), FilePtr);
-    fread(&ShiftGrid, 1, sizeof(VECTOR), FilePtr);
-    fread(&DeltaVDWGrid, 1, sizeof(VECTOR), FilePtr);
-    fread(&unit_cell_size, 1, sizeof(VECTOR), FilePtr);
-    fread(&number_of_unit_cells, 1, sizeof(INT_VECTOR3), FilePtr);
-
-    if ((fabs(UnitCellSize[CurrentSystem].x - unit_cell_size.x) > 1e-8) || (fabs(UnitCellSize[CurrentSystem].y - unit_cell_size.y) > 1e-8) ||
-        (fabs(UnitCellSize[CurrentSystem].z - unit_cell_size.z) > 1e-8))
-    {
-      fprintf(stderr, "Error in reading the grid: unit-cell size does not match\n");
-      exit(0);
-    }
-
-    // Allocate the memory for this grid
-    VDWGrid[GridTypeList[l]] = (float ****)calloc(NumberOfVDWGridPoints.x + 1, sizeof(float ***));
-    for (i = 0; i <= NumberOfVDWGridPoints.x; i++)
-    {
-      VDWGrid[GridTypeList[l]][i] = (float ***)calloc(NumberOfVDWGridPoints.y + 1, sizeof(float **));
-      for (j = 0; j <= NumberOfVDWGridPoints.y; j++)
-      {
-        VDWGrid[GridTypeList[l]][i][j] = (float **)calloc(NumberOfVDWGridPoints.z + 1, sizeof(float *));
-        for (k = 0; k <= NumberOfVDWGridPoints.z; k++)
-          VDWGrid[GridTypeList[l]][i][j][k] = (float *)calloc(8, sizeof(float));
-      }
-    }
-
-    for (m = 0; m < 8; m++)
-      for (i = 0; i <= NumberOfVDWGridPoints.x; i++)
-        for (j = 0; j <= NumberOfVDWGridPoints.y; j++)
-          for (k = 0; k <= NumberOfVDWGridPoints.z; k++)
-            fread(&VDWGrid[GridTypeList[l]][i][j][k][m], 1, sizeof(float), FilePtr);
-
-    fclose(FilePtr);
   }
+
+  fprintf(stderr, "NumberVDW %i\n", 8 * NumberOfVDWGridPoints.x * NumberOfVDWGridPoints.y, NumberOfVDWGridPoints.z);
+  counter = 0;
+  NumberOfVDWGridPoints.x = shape_x;
+  NumberOfVDWGridPoints.y = shape_y;
+  NumberOfVDWGridPoints.z = shape_z;
+
+  int typeA;
+  POINT pos;
+  REAL value, third_derivative;
+  VECTOR first_derivative;
+  REAL_MATRIX3x3 second_derivative;
+
+  // for (m = 0; m < 8; m++)
+  for (i = 0; i <= NumberOfVDWGridPoints.x; i++)
+    for (j = 0; j <= NumberOfVDWGridPoints.y; j++)
+      for (k = 0; k <= NumberOfVDWGridPoints.z; k++)
+      {
+        pos.x = i * SizeGrid.x / NumberOfVDWGridPoints.x + ShiftGrid.x;
+        pos.y = j * SizeGrid.y / NumberOfVDWGridPoints.y + ShiftGrid.y;
+        pos.z = k * SizeGrid.z / NumberOfVDWGridPoints.z + ShiftGrid.z;
+
+        CalculateDerivativesAtPositionVDW(pos, GridTypeList[0], &value, &first_derivative,
+                                          &second_derivative, &third_derivative);
+
+        VDWGrid[GridTypeList[l]][i][j][k][0] = (float)value;
+        VDWGrid[GridTypeList[l]][i][j][k][1] = (float)first_derivative.x * DeltaVDWGrid.x;
+        VDWGrid[GridTypeList[l]][i][j][k][2] = (float)first_derivative.y * DeltaVDWGrid.y;
+        VDWGrid[GridTypeList[l]][i][j][k][3] = (float)first_derivative.z * DeltaVDWGrid.z;
+        VDWGrid[GridTypeList[l]][i][j][k][4] = (float)second_derivative.ay * (DeltaVDWGrid.x * DeltaVDWGrid.y);
+        VDWGrid[GridTypeList[l]][i][j][k][5] = (float)second_derivative.az * (DeltaVDWGrid.x * DeltaVDWGrid.z);
+        VDWGrid[GridTypeList[l]][i][j][k][6] = (float)second_derivative.bz * (DeltaVDWGrid.y * DeltaVDWGrid.z);
+        VDWGrid[GridTypeList[l]][i][j][k][7] = (float)third_derivative * (DeltaVDWGrid.x * DeltaVDWGrid.y * DeltaVDWGrid.z);
+        ++counter;
+      }
+
+  // fclose(FilePtr);
 }
 
 int WriteCoulombGrid(void)
@@ -1008,7 +1203,10 @@ int WriteCoulombGrid(void)
     for (i = 0; i <= NumberOfCoulombGridPoints.x; i++)
       for (j = 0; j <= NumberOfCoulombGridPoints.y; j++)
         for (k = 0; k <= NumberOfCoulombGridPoints.z; k++)
+        {
+
           fwrite(&CoulombGrid[i][j][k][m], 1, sizeof(float), FilePtr);
+        }
 
   fclose(FilePtr);
   return 0;
