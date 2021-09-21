@@ -1034,8 +1034,8 @@ void ReadVDWGrid(void)
     }
   }
 
-  for (i = 0; i < grid_raspa_size; i++)
-    fprintf(stderr, "g %f\n", grid_data_raspa[i]);
+  // for (i = 0; i < grid_raspa_size; i++)
+  //   fprintf(stderr, "g %f\n", grid_data_raspa[i]);
 
   // for (i = 0; i < grid_raspa_size; ++i)
   // {
@@ -1188,7 +1188,7 @@ void ReadVDWGrid(void)
         VDWGrid[GridTypeList[l]][i][j][k][5] = grid_data_raspa[c];
         VDWGrid[GridTypeList[l]][i][j][k][6] = grid_data_raspa[c];
         VDWGrid[GridTypeList[l]][i][j][k][7] = grid_data_raspa[c];
-        fprintf(stderr, "data %f, i %i, j %i, k %i\n", VDWGrid[GridTypeList[l]][i][j][k][0], i, j, k);
+        // fprintf(stderr, "data %f, i %i, j %i, k %i\n", VDWGrid[GridTypeList[l]][i][j][k][0], i, j, k);
         // fprintf(stderr, "data %f, vdw, %f, c %i\n", grid_data_raspa[c], VDWGrid[GridTypeList[l]][i][j][k][0], c);
 
         ++c;
