@@ -1002,37 +1002,7 @@ void ReadVDWGrid(void)
   fprintf(stderr, "Shape x*y*z %i\n", (shape_x) * (shape_y) * (shape_z));
   assert(counter == (shape_x) * (shape_y) * (shape_z));
 
-  int grid_raspa_size = (shape_x + 1) * (shape_y + 1) * (shape_z + 1);
-  float *grid_data_raspa = malloc(grid_raspa_size * sizeof(float));
-
   fprintf(stderr, "GRID RASPA\n");
-
-  //     for (int k = 0; k < shape_x + 1; k++)
-  //   for (int i = 0; i < shape_y + 1; i++)
-  // for (int l = 0; l < shape_z + 1; l++)
-  for (int l = 0; l < shape_z + 1; l++)
-  {
-    for (int i = 0; i < shape_y + 1; i++)
-    {
-      for (int k = 0; k < shape_x + 1; k++)
-      {
-        if (k < shape_x && i < shape_y && l < shape_z)
-        {
-          // fprintf(stderr, "L %i, R %i, k %i, i %i, l %i\n", k + (shape_x + 1) * (i + (shape_y + 1) * l), k + (shape_x) * (i + (shape_y)*l), k, i, l);
-          // fprintf(stderr, "L %i, R %i, k %i, i %i, l %i\n", k + (shape_y + 1) * (i + (shape_z + 1) * l), k + (shape_y) * (i + (shape_z)*l), k, i, l);
-          //x + WIDTH * (y + DEPTH * z)
-
-          grid_data_raspa[l + (shape_z + 1) * (i + (shape_y + 1) * k)] = grid_data[l + (shape_z) * (i + (shape_y)*k)];
-          // grid_data_raspa[k + (shape_x + 1) * (i + (shape_y + 1) * l)] = grid_data[k + (shape_x) * (i + (shape_y)*l)];
-        }
-        else
-        {
-          grid_data_raspa[l + (shape_z + 1) * (i + (shape_y + 1) * k)] = 0;
-          // grid_data_raspa[k + (shape_x + 1) * (i + (shape_y + 1) * l)] = 0;
-        }
-      }
-    }
-  }
 
   // for (i = 0; i < grid_raspa_size; i++)
   //   fprintf(stderr, "g %f\n", grid_data_raspa[i]);
@@ -1101,9 +1071,9 @@ void ReadVDWGrid(void)
   SpacingVDWGrid = mean_spacing;
 
   // fread(&NumberOfVDWGridPoints, 1, sizeof(INT_VECTOR3), FilePtr);
-  NumberOfVDWGridPoints.x = shape_x;
-  NumberOfVDWGridPoints.y = shape_y;
-  NumberOfVDWGridPoints.z = shape_z;
+  NumberOfVDWGridPoints.x = shape_x - 1;
+  NumberOfVDWGridPoints.y = shape_y - 1;
+  NumberOfVDWGridPoints.z = shape_z - 1;
   fprintf(stderr, "NumberOfGridPoints %i %i %i\n", NumberOfVDWGridPoints.x, NumberOfVDWGridPoints.y, NumberOfVDWGridPoints.z);
 
   // fread(&SizeGrid, 1, sizeof(VECTOR), FilePtr);
@@ -1158,9 +1128,6 @@ void ReadVDWGrid(void)
 
   fprintf(stderr, "NumberVDW %i\n", 8 * NumberOfVDWGridPoints.x * NumberOfVDWGridPoints.y, NumberOfVDWGridPoints.z);
   counter = 0;
-  NumberOfVDWGridPoints.x = shape_x;
-  NumberOfVDWGridPoints.y = shape_y;
-  NumberOfVDWGridPoints.z = shape_z;
 
   int typeA;
   POINT pos;
@@ -1180,14 +1147,14 @@ void ReadVDWGrid(void)
 
         // CalculateDerivativesAtPositionVDW(pos, GridTypeList[0], &value, &first_derivative,
         //                                   &second_derivative, &third_derivative);
-        VDWGrid[GridTypeList[l]][i][j][k][0] = grid_data_raspa[c];
-        VDWGrid[GridTypeList[l]][i][j][k][1] = grid_data_raspa[c];
-        VDWGrid[GridTypeList[l]][i][j][k][2] = grid_data_raspa[c];
-        VDWGrid[GridTypeList[l]][i][j][k][3] = grid_data_raspa[c];
-        VDWGrid[GridTypeList[l]][i][j][k][4] = grid_data_raspa[c];
-        VDWGrid[GridTypeList[l]][i][j][k][5] = grid_data_raspa[c];
-        VDWGrid[GridTypeList[l]][i][j][k][6] = grid_data_raspa[c];
-        VDWGrid[GridTypeList[l]][i][j][k][7] = grid_data_raspa[c];
+        VDWGrid[GridTypeList[l]][i][j][k][0] = grid_data[c];
+        VDWGrid[GridTypeList[l]][i][j][k][1] = grid_data[c];
+        VDWGrid[GridTypeList[l]][i][j][k][2] = grid_data[c];
+        VDWGrid[GridTypeList[l]][i][j][k][3] = grid_data[c];
+        VDWGrid[GridTypeList[l]][i][j][k][4] = grid_data[c];
+        VDWGrid[GridTypeList[l]][i][j][k][5] = grid_data[c];
+        VDWGrid[GridTypeList[l]][i][j][k][6] = grid_data[c];
+        VDWGrid[GridTypeList[l]][i][j][k][7] = grid_data[c];
         // fprintf(stderr, "data %f, i %i, j %i, k %i\n", VDWGrid[GridTypeList[l]][i][j][k][0], i, j, k);
         // fprintf(stderr, "data %f, vdw, %f, c %i\n", grid_data_raspa[c], VDWGrid[GridTypeList[l]][i][j][k][0], c);
 
