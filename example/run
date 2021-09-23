@@ -5,7 +5,7 @@
 # Create a file named grid.cube and grid.cif and run this script.
 # A grid.raspa file is created which you can use as an input for RASPA calculations
 
-export RASPA_DIR=${HOME}/Code/RASPA2
+export RASPA_DIR=$(pwd)/..
 export DYLD_LIBRARY_PATH=${RASPA_DIR}/lib
 export LD_LIBRARY_PATH=${RASPA_DIR}/lib
 $RASPA_DIR/bin/simulate $1
