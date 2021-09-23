@@ -1,0 +1,26 @@
+#number of pseudo atoms
+22
+#type      print   as    chem  oxidation   mass        charge   polarization B-factor radii   connectivity anisotropic anisotropic-type   tinker-type
+C_co2      yes     C     C     0           12.0107     0.6512     0.0          1.0      0.720   0            0           relative           0
+O_co2      yes     O     O     0           15.9994    -0.3256     0.0          1.0      0.68    0            0           relative           0
+N_n2       yes     N     N     0           14.00674   -0.482      0.0          1.0      0.7     0            0           relative           0
+N_com      no      N     N     0           0.0         0.964      0.0          1.0      0.7     0            0           relative           0
+Hw         yes     H     H     0           1.008       0.52422    0.0          1.0      0.7     0            0           relative           0
+Ow         yes     O     O     0           15.9994     0.00       0.0          1.0      0.68    0            0           relative           0
+Mw         no      M     -     0           0.0        -1.04844    0.0          1.0      0.7     0            0           relative           0
+Li_ddec         yes     Li    Li    0           6.941       0.7932   0.0          1.0      0.7     0            0           relative           0
+Li_repeat         yes     Li    Li    0           6.941       0.7978   0.0          1.0      0.7     0            0           relative           0
+Li_Li8Cs4I12         yes     Li    Li    0           6.941       0.78267    0.0          1.0      0.7     0            0           relative           0
+Li_tfsi    yes     Li    Li    0           6.941       1.00000    0.0          1.0      0.7     0            0           relative           0
+O_tfsi     yes     O     O     0           15.9994    -0.53     0.0          1.0      0.7     0            0           relative           0
+C_tfsi     yes     C     C     0           12.0107     0.35     0.0          1.0      0.7     0            0           relative           0
+S_tfsi     yes     S     S     0           32.065      1.02     0.0          1.0      0.7     0            0           relative           0
+F_tfsi     yes     F     F     0           18.9984    -0.16     0.0          1.0      0.7     0            0           relative           0
+N_tfsi     yes     N     N     0           14.0067    -0.66     0.0          1.0      0.7     0            0           relative           0
+C_dol_oc   yes     C     C     0           12.0107     0.296     0.0          1.0      0.7     0            0           relative           0
+C_dol_oo   yes     C     C     0           12.0107     0.538     0.0          1.0      0.7     0            0           relative           0
+O_dol     yes     O     O     0           15.9994    -0.565     0.0          1.0      0.7     0            0           relative           0
+C_dme_ch3   yes     C     C     0           12.0107     0.200     0.0          1.0      0.7     0            0           relative           0
+C_dme_ch2   yes     C     C     0           12.0107     0.216     0.0          1.0      0.7     0            0           relative           0
+O_dme     yes     O     O     0             15.9994    -0.416     0.0          1.0      0.7     0            0           relative           0
+

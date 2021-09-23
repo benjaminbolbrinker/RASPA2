@@ -1,0 +1,14 @@
+# vtk DataFile Version 1.0
+Cube
+ASCII
+
+DATASET POLYDATA
+POINTS 1 float
+5.782960 2.101569 2.161815
+LINES 0 0
+POINT_DATA 1
+SCALARS my_scalars float
+LOOKUP_TABLE default
+1.82
+VECTORS vectors float
+0.4375 0 0

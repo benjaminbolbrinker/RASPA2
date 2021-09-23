@@ -1,0 +1,30 @@
+SimulationType                MonteCarlo
+NumberOfCycles                1000
+NumberOfInitializationCycles  1000
+PrintEvery                    1000
+
+Forcefield                    Dubbeldam2007FlexibleIRMOF-1
+EwaldPrecision 1e-5
+
+Framework 0
+FrameworkName grid
+UnitCells 1 1 1
+ExternalTemperature 298.0
+ExternalPressure 5000000.0
+CutOffVDW 2.5
+
+NumberOfGrids 1
+GridTypes Li_ddec 
+UseTabularGrid yes
+OmitInterMolecularInteractions yes
+
+ComputeDensityProfile3DVTKGrid yes
+
+DensityProfile3DVTKGridPoints 50 50 50
+
+Component 0 MoleculeName                     Li_ddec
+            MoleculeDefinition               ExampleDefinitions
+            TranslationProbability         	 1.0
+			RandomTranslationProbability     1.0
+            CreateNumberOfMolecules          1
+			

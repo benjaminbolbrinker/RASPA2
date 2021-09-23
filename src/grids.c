@@ -795,22 +795,6 @@ int WriteVDWGrid(int l)
 
 unsigned int buffsize = 1024;
 
-int count_words(char *line)
-{
-  int i;
-  int count = 0;
-  for (i = 0; line[i] != '\0'; i++)
-
-  {
-
-    if (line[i] == ' ' && line[i + 1] != ' ')
-
-      count++;
-  }
-
-  return count;
-}
-
 char **split_by_space(char *line, int n_strings)
 {
   unsigned int i;
@@ -914,7 +898,7 @@ void ReadVDWGrid(void)
   char buffer[256];
 
   double bohr2angstrom = 0.529177249;
-  fprintf(stderr, "Doing something extra\n");
+  fprintf(stderr, "READING 'grid.cube' file and converting it to RASPA grid format.\n");
   FILE *fp;
   if (!(fp = fopen("grid.cube", "r")))
   {
@@ -984,16 +968,26 @@ void ReadVDWGrid(void)
 
   float *grid_data = malloc((shape_x) * (shape_y) * (shape_z) * sizeof(float));
   int counter = 0;
+  char *token;
   while ((read = getline(&line, &len, fp)) != -1)
   {
-    int n_floats = count_words(line);
-    char **data = split_by_space(line, n_floats);
-
-    for (idx = 0; idx < n_floats; ++idx)
+    token = strtok(line, " ");
+    /* walk through other tokens */
+    while (token != NULL)
     {
-      grid_data[counter] = extended_atof(data[idx]);
+      grid_data[counter] = extended_atof(token);
       ++counter;
+      token = strtok(NULL, line);
     }
+
+    // int n_floats = count_words(line);
+    // char **data = split_by_space(line, n_floats);
+
+    // for (idx = 0; idx < n_floats; ++idx)
+    // {
+    //   grid_data[counter] = extended_atof(data[idx]);
+    //   ++counter;
+    // }
   }
   fprintf(stderr, "Counter %i\n", counter);
   fprintf(stderr, "shape_x %i\n", shape_x);
@@ -1023,8 +1017,6 @@ void ReadVDWGrid(void)
   if (line)
     free(line);
   fclose(fp);
-
-  fprintf(stderr, "Stop doing something extra\n");
 
   fprintf(stderr, "Reading VDW grid\n");
 
@@ -1098,7 +1090,7 @@ void ReadVDWGrid(void)
   unit_cell_size.x = SizeGrid.x;
   unit_cell_size.y = SizeGrid.y;
   unit_cell_size.z = SizeGrid.z;
-  fprintf(stderr, "unitcellsize %f %f %f\n", unit_cell_size.x, unit_cell_size.y, unit_cell_size.z);
+  fprintf(stderr, "unitcellsize %.12f %.12f %.12f\n", unit_cell_size.x, unit_cell_size.y, unit_cell_size.z);
 
   // fread(&number_of_unit_cells, 1, sizeof(INT_VECTOR3), FilePtr);
   number_of_unit_cells.x = 1;
@@ -1182,6 +1174,7 @@ void ReadVDWGrid(void)
   // Write the stuff into a RASPA format
   FILE *FilePtr;
 
+  fprintf(stderr, "Writing to 'grid.raspa'.\n");
   FilePtr = fopen("grid.raspa", "w");
 
   fwrite(&SpacingVDWGrid, 1, sizeof(REAL), FilePtr);
@@ -1208,6 +1201,7 @@ void ReadVDWGrid(void)
   //     for (k = 0; k <= NumberOfVDWGridPoints.z; k++)
   //       fprintf(stderr, "read %f, i %i, j %i, k %i\n", VDWGrid[GridTypeList[l]][i][j][k][0], i, j, k);
   fclose(FilePtr);
+  fprintf(stderr, "SUCESS!\n");
   exit(0);
 }
 

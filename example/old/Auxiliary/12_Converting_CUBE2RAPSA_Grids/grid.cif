@@ -1,0 +1,41 @@
+data_image0
+_cell_length_a       9.239648580031
+_cell_length_b       9.238139385250
+_cell_length_c       10.948187806008
+_cell_angle_alpha    90.00724
+_cell_angle_beta     89.99788
+_cell_angle_gamma    89.99245
+
+_symmetry_space_group_name_H-M    "P 1"
+_symmetry_int_tables_number       1
+
+loop_
+  _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+
+loop_
+   _atom_site_label
+   _atom_site_occupancy
+   _atom_site_fract_x
+   _atom_site_fract_y
+   _atom_site_fract_z
+   _atom_site_adp_type
+   _atom_site_B_iso_or_equiv
+   _atom_site_type_symbol
+   Li1         1.0     9.140834     9.136360    10.847729    Biso  1.000000 Li
+   Cs1         1.0     2.273466     2.361169    10.918339    Biso  1.000000 Cs
+   I1          1.0     2.273732     2.360233     5.444428    Biso  1.000000 I
+   I2          1.0     9.203235     0.052033     8.643167    Biso  1.000000 I
+   I3          1.0     9.202573     0.052224     2.243759    Biso  1.000000 I
+   Cs2         1.0     2.274085     6.980228    10.918339    Biso  1.000000 Cs
+   I4          1.0     2.274351     6.979291     5.444428    Biso  1.000000 I
+   I5          1.0     9.203854     4.671093     8.643167    Biso  1.000000 I
+   I6          1.0     9.203192     4.671284     2.243759    Biso  1.000000 I
+   Cs3         1.0     6.893287     2.361169    10.918339    Biso  1.000000 Cs
+   I7          1.0     6.893553     2.360233     5.444428    Biso  1.000000 I
+   I8          1.0     4.583414     0.052033     8.643167    Biso  1.000000 I
+   I9          1.0     4.582752     0.052224     2.243759    Biso  1.000000 I
+   Cs4         1.0     6.893905     6.980228    10.918339    Biso  1.000000 Cs
+   I10         1.0     6.894172     6.979291     5.444428    Biso  1.000000 I
+   I11         1.0     4.584033     4.671093     8.643167    Biso  1.000000 I
+   I12         1.0     4.583371     4.671284     2.243759    Biso  1.000000 I
