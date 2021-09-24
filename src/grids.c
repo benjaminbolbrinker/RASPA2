@@ -973,11 +973,11 @@ void ReadVDWGrid(void)
   {
     token = strtok(line, " ");
     /* walk through other tokens */
-    while (token != NULL)
+    while (token != NULL && token[0] != '\n')
     {
       grid_data[counter] = extended_atof(token);
       ++counter;
-      token = strtok(NULL, line);
+      token = strtok(NULL, " ");
     }
 
     // int n_floats = count_words(line);
