@@ -972,6 +972,7 @@ void ReadVDWGrid(void)
   while ((read = getline(&line, &len, fp)) != -1)
   {
     token = strtok(line, " ");
+
     /* walk through other tokens */
     while (token != NULL && token[0] != '\n')
     {
@@ -979,15 +980,6 @@ void ReadVDWGrid(void)
       ++counter;
       token = strtok(NULL, " ");
     }
-
-    // int n_floats = count_words(line);
-    // char **data = split_by_space(line, n_floats);
-
-    // for (idx = 0; idx < n_floats; ++idx)
-    // {
-    //   grid_data[counter] = extended_atof(data[idx]);
-    //   ++counter;
-    // }
   }
   fprintf(stderr, "Counter %i\n", counter);
   fprintf(stderr, "shape_x %i\n", shape_x);
@@ -997,14 +989,6 @@ void ReadVDWGrid(void)
   assert(counter == (shape_x) * (shape_y) * (shape_z));
 
   fprintf(stderr, "GRID RASPA\n");
-
-  // for (i = 0; i < grid_raspa_size; i++)
-  //   fprintf(stderr, "g %f\n", grid_data_raspa[i]);
-
-  // for (i = 0; i < grid_raspa_size; ++i)
-  // {
-  //   fprintf(stderr, "%f\n", grid_data_raspa[i]);
-  // }
 
   fprintf(stderr, "Counter %i\n", counter);
   fprintf(stderr, "NATOMS %i\n", n_atoms);
@@ -1201,6 +1185,108 @@ void ReadVDWGrid(void)
   //     for (k = 0; k <= NumberOfVDWGridPoints.z; k++)
   //       fprintf(stderr, "read %f, i %i, j %i, k %i\n", VDWGrid[GridTypeList[l]][i][j][k][0], i, j, k);
   fclose(FilePtr);
+
+  fprintf(stderr, "Create corresponding .cif file...\n");
+  FILE *fp_cif = fopen("grid_raspa.cif", "w");
+  FILE *fp_cif_old = fopen("grid.cif", "r");
+
+  int buffer_size = 256;
+  line = NULL;
+  char *substr = NULL;
+
+  char *line_cif = (char *)malloc(buffer_size * sizeof(char));
+
+  double alpha = acos((cell[1][0] * cell[2][0] + cell[1][1] * cell[2][1] + cell[1][2] * cell[2][2]) / ((unit_cell_size.y * unit_cell_size.z))) * 180.0 / M_PI;
+  double beta = acos((cell[0][0] * cell[2][0] + cell[0][1] * cell[2][1] + cell[0][2] * cell[2][2]) / ((unit_cell_size.x * unit_cell_size.z))) * 180.0 / M_PI;
+  double gamma = acos((cell[0][0] * cell[1][0] + cell[0][1] * cell[1][1] + cell[0][2] * cell[1][2]) / ((unit_cell_size.x * unit_cell_size.y))) * 180.0 / M_PI;
+  while ((read = getline(&line, &len, fp_cif_old)) != -1)
+  {
+    if (strstr(line, "_cell_length_a") ||
+        strstr(line, "_cell_length_b") ||
+        strstr(line, "_cell_length_c") ||
+        strstr(line, "_cell_angle_alpha") ||
+        strstr(line, "_cell_angle_beta") ||
+        strstr(line, "_cell_angle_gamma"))
+    {
+      if (strstr(line, "_cell_length_a"))
+      {
+        sprintf(line_cif, "_cell_length_a %.12f\n", unit_cell_size.x);
+        fputs(line_cif, fp_cif);
+        free(line_cif);
+      }
+      if (strstr(line, "_cell_length_b"))
+      {
+        sprintf(line_cif, "_cell_length_b %.12f\n", unit_cell_size.y);
+        fputs(line_cif, fp_cif);
+        free(line_cif);
+      }
+      if (strstr(line, "_cell_length_c"))
+      {
+        sprintf(line_cif, "_cell_length_c %.12f\n", unit_cell_size.z);
+        fputs(line_cif, fp_cif);
+        free(line_cif);
+      }
+      if (strstr(line, "_cell_angle_alpha"))
+      {
+        line_cif = (char *)malloc(buffer_size * sizeof(char));
+        sprintf(line_cif, "_cell_angle_alpha %.12f\n", alpha);
+        fputs(line_cif, fp_cif);
+        free(line_cif);
+      }
+      if (strstr(line, "_cell_angle_beta"))
+      {
+        line_cif = (char *)malloc(buffer_size * sizeof(char));
+        sprintf(line_cif, "_cell_angle_beta %.12f\n", beta);
+        fputs(line_cif, fp_cif);
+        free(line_cif);
+      }
+      if (strstr(line, "_cell_angle_gamma"))
+      {
+        line_cif = (char *)malloc(buffer_size * sizeof(char));
+        sprintf(line_cif, "_cell_angle_gamma %.12f\n", gamma);
+        fputs(line_cif, fp_cif);
+        free(line_cif);
+      }
+    }
+    else
+    {
+      fputs(line, fp_cif);
+    }
+  }
+
+  fclose(fp_cif_old);
+
+  // fputs("\n", fp_cif);
+  // fputs("_symmetry_space_group_name_H-M    \"P 1\"\n", fp_cif);
+  // fputs("_symmetry_int_tables_number\n", fp_cif);
+  // fputs("\n", fp_cif);
+  // fputs("loop_\n", fp_cif);
+  // fputs(" _symmetry_equiv_pos_as_xyz\n", fp_cif);
+  // fputs(" 'x, y, z'\n", fp_cif);
+  // fputs("\n", fp_cif);
+  // fputs("loop_\n", fp_cif);
+
+  // fputs(" _atom_site_label\n", fp_cif);
+  // fputs(" _atom_site_occupancy\n", fp_cif);
+  // fputs(" _atom_site_fract_x\n", fp_cif);
+  // fputs(" _atom_site_fract_y\n", fp_cif);
+  // fputs(" _atom_site_fract_z\n", fp_cif);
+  // fputs(" _atom_site_adp_type\n", fp_cif);
+  // fputs(" _atom_site_B_iso_or_equiv\n", fp_cif);
+  // fputs(" _atom_site_type_symbol\n", fp_cif);
+
+  // for (i = 0; i < n_atoms; ++i)
+  // {
+  //   fprintf(stderr, "%s\n", PseudoAtoms[i].ChemicalElement);
+  //   line_cif = (char *)malloc(buffer_size * sizeof(char));
+  //   sprintf(line_cif, "H%i 1.0 %f %f %f Biso 1.000 H\n", i, Framework[0].Atoms[0][i].Position.x / bohr2angstrom, Framework[0].Atoms[0][i].Position.y / bohr2angstrom, Framework[0].Atoms[0][i].Position.z / bohr2angstrom);
+  //   fputs(line_cif, fp_cif);
+  //   free(line_cif);
+  // }
+  fclose(fp_cif);
+
+  // WriteFrameworkDefinitionCIF("final");
+
   fprintf(stderr, "SUCESS!\n");
   exit(0);
 }
