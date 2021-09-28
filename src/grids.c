@@ -1212,40 +1212,34 @@ void ReadVDWGrid(void)
       {
         sprintf(line_cif, "_cell_length_a %.12f\n", unit_cell_size.x);
         fputs(line_cif, fp_cif);
-        free(line_cif);
       }
       if (strstr(line, "_cell_length_b"))
       {
         sprintf(line_cif, "_cell_length_b %.12f\n", unit_cell_size.y);
         fputs(line_cif, fp_cif);
-        free(line_cif);
       }
       if (strstr(line, "_cell_length_c"))
       {
         sprintf(line_cif, "_cell_length_c %.12f\n", unit_cell_size.z);
         fputs(line_cif, fp_cif);
-        free(line_cif);
       }
       if (strstr(line, "_cell_angle_alpha"))
       {
         line_cif = (char *)malloc(buffer_size * sizeof(char));
         sprintf(line_cif, "_cell_angle_alpha %.12f\n", alpha);
         fputs(line_cif, fp_cif);
-        free(line_cif);
       }
       if (strstr(line, "_cell_angle_beta"))
       {
         line_cif = (char *)malloc(buffer_size * sizeof(char));
         sprintf(line_cif, "_cell_angle_beta %.12f\n", beta);
         fputs(line_cif, fp_cif);
-        free(line_cif);
       }
       if (strstr(line, "_cell_angle_gamma"))
       {
         line_cif = (char *)malloc(buffer_size * sizeof(char));
         sprintf(line_cif, "_cell_angle_gamma %.12f\n", gamma);
         fputs(line_cif, fp_cif);
-        free(line_cif);
       }
     }
     else
@@ -1253,39 +1247,11 @@ void ReadVDWGrid(void)
       fputs(line, fp_cif);
     }
   }
+  free(line_cif);
 
   fclose(fp_cif_old);
 
-  // fputs("\n", fp_cif);
-  // fputs("_symmetry_space_group_name_H-M    \"P 1\"\n", fp_cif);
-  // fputs("_symmetry_int_tables_number\n", fp_cif);
-  // fputs("\n", fp_cif);
-  // fputs("loop_\n", fp_cif);
-  // fputs(" _symmetry_equiv_pos_as_xyz\n", fp_cif);
-  // fputs(" 'x, y, z'\n", fp_cif);
-  // fputs("\n", fp_cif);
-  // fputs("loop_\n", fp_cif);
-
-  // fputs(" _atom_site_label\n", fp_cif);
-  // fputs(" _atom_site_occupancy\n", fp_cif);
-  // fputs(" _atom_site_fract_x\n", fp_cif);
-  // fputs(" _atom_site_fract_y\n", fp_cif);
-  // fputs(" _atom_site_fract_z\n", fp_cif);
-  // fputs(" _atom_site_adp_type\n", fp_cif);
-  // fputs(" _atom_site_B_iso_or_equiv\n", fp_cif);
-  // fputs(" _atom_site_type_symbol\n", fp_cif);
-
-  // for (i = 0; i < n_atoms; ++i)
-  // {
-  //   fprintf(stderr, "%s\n", PseudoAtoms[i].ChemicalElement);
-  //   line_cif = (char *)malloc(buffer_size * sizeof(char));
-  //   sprintf(line_cif, "H%i 1.0 %f %f %f Biso 1.000 H\n", i, Framework[0].Atoms[0][i].Position.x / bohr2angstrom, Framework[0].Atoms[0][i].Position.y / bohr2angstrom, Framework[0].Atoms[0][i].Position.z / bohr2angstrom);
-  //   fputs(line_cif, fp_cif);
-  //   free(line_cif);
-  // }
   fclose(fp_cif);
-
-  // WriteFrameworkDefinitionCIF("final");
 
   fprintf(stderr, "SUCESS!\n");
   exit(0);
